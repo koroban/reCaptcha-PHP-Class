@@ -76,17 +76,17 @@ class reCaptcha {
 	public function check_answer($remote_ip, $challenge, $response, $extra_params = array()){
 		
 		if(is_null($this->private_key) || empty($this->private_key)) exit('To use reCAPTCHA you must get an API key from <a href="'.$this->api_create.'">'.$this->api_create.'</a>');
-	
+		
 		if(is_null($remote_ip) || empty($remote_ip)) exit('For security reasons, you must pass the remote IP to reCAPTCHA');
-
-	    // discard spam submissions
-        if(is_null($challenge) || strlen($challenge) == 0 || is_null($response) || strlen($response) == 0){		
+		
+		// discard spam submissions
+		if(is_null($challenge) || strlen($challenge) == 0 || is_null($response) || strlen($response) == 0){		
 			$this->is_valid = false;
 			$this->error_message = 'incorrect-captcha-sol';
 			return;
-        }
-
-        $response = $this->post(
+		}
+		
+		$response = $this->post(
 			$this->verify_server, 
 			'/recaptcha/api/verify',
 			array(
@@ -96,21 +96,21 @@ class reCaptcha {
 				'response' => $response
 			) + $extra_params
 		);
-
-        $answers = explode ("\n", $response[1]);
-
-        if(trim($answers[0]) == 'true'){
-			
-			$this->is_valid = true;
-			
-        }else{
-			
-            $this->is_valid = false;
-			$this->error_message = $answers [1];
-			
-        }
 		
-        return ($this->is_valid ? $this->is_valid : false);
+		$answers = explode ("\n", $response[1]);
+		
+		if(trim($answers[0]) == 'true'){
+		
+			$this->is_valid = true;
+		
+		}else{
+		
+			$this->is_valid = false;
+			$this->error_message = $answers [1];
+		
+		}
+		
+		return ($this->is_valid ? $this->is_valid : false);
 		
 	}	
 	
