@@ -1,0 +1,3 @@
+Re-factored PHP code based on Google library of the reCaptcha API (reCAPTCHA Library for PHP - v1.11). Improved through implementing it as a class. Includes support for MailHide as a separate class.
+
+Note that you will need to signup for API keys for both reCAPTCHA and MailHide, respectively. http://www.google.com/recaptcha
