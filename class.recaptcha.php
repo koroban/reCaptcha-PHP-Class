@@ -14,42 +14,42 @@ class reCaptcha {
 	
 	private function encode_query($data){
 		
-        $request = '';
+		$request = '';
 		
-        foreach($data as $key => $value) $request .= $key.'='.urlencode(stripslashes($value)).'&';
-
-        // cut the last '&'
-        $request = substr($request, 0, strlen($request) - 1);
+		foreach($data as $key => $value) $request .= $key.'='.urlencode(stripslashes($value)).'&';
 		
-        return $request;
+		// cut the last '&'
+		$request = substr($request, 0, strlen($request) - 1);
+		
+		return $request;
 		
 	}
 	
 	private function post($host, $path, $data, $port = 80){
 
-        $request = $this->encode_query($data);
-
-        $http_request  = "POST $path HTTP/1.0\r\n";
-        $http_request .= "Host: $host\r\n";
-        $http_request .= "Content-Type: application/x-www-form-urlencoded;\r\n";
-        $http_request .= "Content-Length: ".strlen($request)."\r\n";
-        $http_request .= "User-Agent: reCAPTCHA/PHP\r\n";
-        $http_request .= "\r\n";
-        $http_request .= $request;
-
-        $response = '';
+		$request = $this->encode_query($data);
 		
-        if(false == ($fs = fsockopen($host, $port, $errno, $errstr, 10))) exit('reCaptcha: Could not open socket');
-
-        fwrite($fs, $http_request);
-
-        while(!feof($fs)) $response .= fgets($fs, 1160); // One TCP-IP packet
+		$http_request  = "POST $path HTTP/1.0\r\n";
+		$http_request .= "Host: $host\r\n";
+		$http_request .= "Content-Type: application/x-www-form-urlencoded;\r\n";
+		$http_request .= "Content-Length: ".strlen($request)."\r\n";
+		$http_request .= "User-Agent: reCAPTCHA/PHP\r\n";
+		$http_request .= "\r\n";
+		$http_request .= $request;
 		
-        fclose($fs);
+		$response = '';
 		
-        $response = explode("\r\n\r\n", $response, 2);
-
-        return $response;
+		if(false == ($fs = fsockopen($host, $port, $errno, $errstr, 10))) exit('reCaptcha: Could not open socket');
+		
+		fwrite($fs, $http_request);
+		
+		while(!feof($fs)) $response .= fgets($fs, 1160); // One TCP-IP packet
+		
+		fclose($fs);
+		
+		$response = explode("\r\n\r\n", $response, 2);
+		
+		return $response;
 		
 	}
 	
