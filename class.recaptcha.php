@@ -147,11 +147,11 @@ class reCaptcha extends reCaptchaBase {
         }
 
         $out .= '<script type="text/javascript" src="' . $url . '/challenge?k=' . $this->public_key . 
-               ($error ? '&error=' . url_encode($error) : '') . '"></script>';
+               ($error ? '&error=' . urlencode($error) : '') . '"></script>';
 
         $out .= '<noscript>' . 
                 '<iframe src="' . $url . '/noscript?k=' . $this->public_key . 
-                ($error ? '&error=' . url_encode($error) : '') .
+                ($error ? '&error=' . urlencode($error) . : '') .
                 '" height="300" width="500" frameborder="0"></iframe><br/>' .
                 '<textarea name="recaptcha_challenge_field" rows="3" cols="40"></textarea>' .
                 '<input type="hidden" name="recaptcha_response_field" value="manual_challenge">' .
