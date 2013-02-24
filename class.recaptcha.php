@@ -1,8 +1,36 @@
 <?php
+/**
+ * Google reCatpcha API Base class
+ *
+ * @license BSD http://www.opensource.org/licenses/bsd-license.php
+ */
 abstract class reCaptchaBase {
+    /**
+     * public key for encryption
+     *
+     * @var string
+     */
     private $public_key;
+
+    /**
+     * private key for encryption
+     *
+     * @var string
+     */
     private $private_key;
+
+    /**
+     * curl resource instance
+     * 
+     * @var resource
+     */
     private $ch;
+
+    /**
+     * Google reCaptcha API URL
+     *
+     * @var string
+     */
     private $api_server = 'www.google.com/recaptcha/api';
 
     /**
@@ -13,7 +41,7 @@ abstract class reCaptchaBase {
      * @param $private_key string key to use as private key
      * @param $init_curl bool init curl instance
      * 
-     * @throw InvalidArgumentException if private/public key missing
+     * @throws InvalidArgumentException
      *
      * @return reCaptcha
      */
@@ -64,7 +92,7 @@ abstract class reCaptchaBase {
      * @param $url string url to send call to
      * @param $data array post parameter for call
      *
-     * @throw RuntimeException if invalid curl response
+     * @throws RuntimeException
      *
      * @return string result of post call
      */
@@ -84,8 +112,18 @@ abstract class reCaptchaBase {
     }
 }
 
+/**
+ * Google reCaptcha API Class
+ *
+ * @license BSD http://www.opensource.org/licenses/bsd-license.php
+ */
 class reCaptcha extends reCaptchaBase {
-    private $error_message;
+    /**
+     * error message of API if response validation failed
+     *
+     * @var string
+     */
+    private $error;
 
     /**
      * Gets the challenge HTML (javascript and non-javascript version).
@@ -125,22 +163,26 @@ class reCaptcha extends reCaptchaBase {
     /**
       * Calls an HTTP POST function to verify if the user's guess was correct
       *
-      * @param string $remote_ip
-      * @param string $challenge
-      * @param string $response
+      * @param string $remote_ip client remote ip, needed for validation
+      * @param string $challenge api chalange
+      * @param string $response api response
       * @param array $extra_params an array of extra variables to post to the server
+      *
+      * @throws InvalidArgumentException
+      * @throws UnexpectedValueException
       *
       * @return bool True if valid answer
       */
     public function check_answer($remote_ip, $challenge, $response, $extra_params = array())
     {
-        if (is_null($remote_ip) || empty($remote_ip)) {
+        $this->error = '';
+        if (empty($remote_ip)) {
             throw new InvalidArgumentException('For security reasons, you must pass the remote IP to reCAPTCHA');
         }
 
         // discard spam submissions
         if (empty($challenge) || empty($response)) {
-            $this->error_message = 'incorrect-captcha-sol';
+            $this->error = 'incorrect-captcha-sol';
             return false;
         }
 
@@ -157,7 +199,7 @@ class reCaptcha extends reCaptchaBase {
             throw new UnexpectedValueException('Invalid API Response.');
         }
 
-        $answers = explode("\n", $res);
+        $answers = explode("\n", $res, 1);
         if (empty($answer)) {
             throw new UnexpectedValueException('Invalid API Response.');
         }
@@ -165,11 +207,25 @@ class reCaptcha extends reCaptchaBase {
         if (trim($answers[0]) == 'true') {
             return true;
         }
-        $this->error_message = $answers[1];
+        $this->error = $answers[1];
         return false;
+    }
+
+    /**
+     * get API error string
+     *
+     * @return string
+     */
+    public function getError() {
+        return $this->error;
     }
 }
 
+/**
+ * Google MailHide API Class
+ *
+ * @license BSD http://www.opensource.org/licenses/bsd-license.php
+ */
 class MailHide extends reCaptchaBase
 {
     /**
@@ -239,7 +295,8 @@ class MailHide extends reCaptchaBase
     {
         $ky         = pack('H*', $this->private_key);
         $crypt_mail = $this->_aes_encrypt($email, $ky);
-        return 'http://www.google.com/recaptcha/mailhide/d?k=' . $this->public_key . '&c=' . $this->_get_mailhide_urlbase64($crypt_mail);
+        return 'http://www.google.com/recaptcha/mailhide/d?k=' . $this->public_key . 
+               '&c=' . $this->_get_mailhide_urlbase64($crypt_mail);
     }
 
     /**
@@ -268,7 +325,7 @@ class MailHide extends reCaptchaBase
      * Gets html to display an email address given a public an private key.
      * to get a key, go to:
      *
-     * http://www.google.com/recaptcha/mailhide/apikey
+     * @see http://www.google.com/recaptcha/mailhide/apikey
      *
      * @param $email string email to convert
      *
