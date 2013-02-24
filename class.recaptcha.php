@@ -10,14 +10,14 @@ abstract class reCaptchaBase {
      *
      * @var string
      */
-    private $public_key;
+    protected $public_key;
 
     /**
-     * private key for encryption
+     * protected key for encryption
      *
      * @var string
      */
-    private $private_key;
+    protected $protected_key;
 
     /**
      * curl resource instance
@@ -31,7 +31,7 @@ abstract class reCaptchaBase {
      *
      * @var string
      */
-    private $api_server = 'www.google.com/recaptcha/api';
+    static protected $api_server = 'www.google.com/recaptcha/api';
 
     /**
      * Constructor
@@ -139,7 +139,7 @@ class reCaptcha extends reCaptchaBase {
     public function form($error = false, $use_ssl = false, $options = array())
     {
         $out = '';
-        $url = 'http' . ($use_ssl ? 's' : '') . '://' . $this->api_server;
+        $url = 'http' . ($use_ssl ? 's' : '') . '://' . self::$api_server;
 
         if (!empty($options)) {
             $out .= '<script type="text/javascript">' . 
@@ -151,7 +151,7 @@ class reCaptcha extends reCaptchaBase {
 
         $out .= '<noscript>' . 
                 '<iframe src="' . $url . '/noscript?k=' . $this->public_key . 
-                ($error ? '&error=' . urlencode($error) . : '') .
+                ($error ? '&error=' . urlencode($error) : '') .
                 '" height="300" width="500" frameborder="0"></iframe><br/>' .
                 '<textarea name="recaptcha_challenge_field" rows="3" cols="40"></textarea>' .
                 '<input type="hidden" name="recaptcha_response_field" value="manual_challenge">' .
@@ -186,7 +186,7 @@ class reCaptcha extends reCaptchaBase {
             return false;
         }
 
-        $res = $this->__call('http://' . $this->api_server . '/verify', 
+        $res = $this->__call('http://' . self::$api_server . '/verify', 
             array_merge(array(
                 'privatekey' => $this->private_key,
                 'remoteip' => $remote_ip,
