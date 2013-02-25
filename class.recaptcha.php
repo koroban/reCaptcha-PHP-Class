@@ -96,7 +96,7 @@ abstract class reCaptchaBase {
      *
      * @return string result of post call
      */
-    private function _call($url, $data = array())
+    protected function _call($url, $data = array())
     {
         curl_setopt_array($this->ch, array(
             CURLOPT_URL => $url,
@@ -186,7 +186,7 @@ class reCaptcha extends reCaptchaBase {
             return false;
         }
 
-        $res = $this->__call('http://' . self::$api_server . '/verify',
+        $res = $this->_call('http://' . self::$api_server . '/verify',
             array_merge(array(
                 'privatekey' => $this->private_key,
                 'remoteip' => $remote_ip,
@@ -196,12 +196,12 @@ class reCaptcha extends reCaptchaBase {
         );
 
         if (empty($res)) {
-            throw new UnexpectedValueException('Invalid API Response.');
+            throw new \UnexpectedValueException('Invalid API Response.');
         }
 
-        $answers = explode("\n", $res, 1);
-        if (empty($answer)) {
-            throw new UnexpectedValueException('Invalid API Response.');
+        $answers = explode("\n", $res, 2);
+        if (empty($answers)) {
+            throw new \UnexpectedValueException('Invalid API Response.');
         }
 
         if (trim($answers[0]) == 'true') {
